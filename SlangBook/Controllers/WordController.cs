@@ -2,6 +2,7 @@
 using System.Data;
 using Npgsql;
 using SlangBook.Models;
+using Microsoft.Extensions.Logging;
 
 namespace SlangBook.Controllers
 {
@@ -19,100 +20,129 @@ namespace SlangBook.Controllers
         [HttpGet]
         public JsonResult Get()
         {
-            string query = @"SELECT * FROM words";
-
-            DataTable table = new DataTable();
-            string sqlDataSource = _configuration.GetConnectionString("WordsAppCon");
-            NpgsqlDataReader myReader;
-            using (NpgsqlConnection myCon = new NpgsqlConnection(sqlDataSource))
+            try
             {
-                myCon.Open();
-                using (NpgsqlCommand myCommand = new NpgsqlCommand(query, myCon))
+                string query = @"SELECT * FROM words";
+
+                DataTable table = new DataTable();
+                string sqlDataSource = _configuration.GetConnectionString("WordsAppCon");
+                NpgsqlDataReader myReader;
+                using (NpgsqlConnection myCon = new NpgsqlConnection(sqlDataSource))
                 {
-                    myReader = myCommand.ExecuteReader(); 
-                    table.Load(myReader);
-                    myReader.Close();
-                    myCon.Close(); 
+                    myCon.Open();
+                    using (NpgsqlCommand myCommand = new NpgsqlCommand(query, myCon))
+                    {
+                        myReader = myCommand.ExecuteReader(); 
+                        table.Load(myReader);
+                        myReader.Close();
+                        myCon.Close(); 
+                    }
                 }
+                return new JsonResult(table);
+            } 
+            catch (Exception ex)
+            {
+                return new JsonResult(ex);
             }
-            return new JsonResult(table);
         }
 
         [HttpPost]
         public JsonResult Post(Word word)
         {
-            string query = @"INSERT INTO words(name, slang) 
-                            VALUES (@WordName, @WordSlang)
-                            ";
-
-            DataTable table = new DataTable();
-            string sqlDataSource = _configuration.GetConnectionString("WordsAppCon");
-            NpgsqlDataReader myReader;
-            using (NpgsqlConnection myCon = new NpgsqlConnection(sqlDataSource))
+            try
             {
-                myCon.Open();
-                using (NpgsqlCommand myCommand = new NpgsqlCommand(query, myCon))
+                string query = @"INSERT INTO words(name, definition, slang) 
+                                VALUES (@WordName, @WordDefinition, @WordSlang)
+                                ";
+
+                DataTable table = new DataTable();
+                string sqlDataSource = _configuration.GetConnectionString("WordsAppCon");
+                NpgsqlDataReader myReader;
+                using (NpgsqlConnection myCon = new NpgsqlConnection(sqlDataSource))
                 {
-                    myCommand.Parameters.AddWithValue("@WordName", word.Name);
-                    myCommand.Parameters.AddWithValue("@WordSlang", word.Slang);
-                    myReader = myCommand.ExecuteReader();
-                    table.Load(myReader);
-                    myReader.Close();
-                    myCon.Close();
+                    myCon.Open();
+                    using (NpgsqlCommand myCommand = new NpgsqlCommand(query, myCon))
+                    {
+                        myCommand.Parameters.AddWithValue("@WordName", word.Name);
+                        myCommand.Parameters.AddWithValue("@WordDefinition", word.Definition);
+                        myCommand.Parameters.AddWithValue("@WordSlang", word.Slang);
+                        myReader = myCommand.ExecuteReader();
+                        table.Load(myReader);
+                        myReader.Close();
+                        myCon.Close();
+                    }
                 }
+                return new JsonResult("Successfully added to words database!");
             }
-            return new JsonResult("Successfully added to words database!");
+            catch (Exception ex)
+            {
+                return new JsonResult(ex);
+            }
         }
 
 
         [HttpPut]
         public JsonResult Put(Word word)
         {
-            string query = @"UPDATE words 
-                             SET name = @WordName 
-                             WHERE id = @WordId
-                             ";
-
-            DataTable table = new DataTable();
-            string sqlDataSource = _configuration.GetConnectionString("WordsAppCon");
-            NpgsqlDataReader myReader;
-            using (NpgsqlConnection myCon = new NpgsqlConnection(sqlDataSource))
+            try
             {
-                myCon.Open();
-                using (NpgsqlCommand myCommand = new NpgsqlCommand(query, myCon))
+                string query = @"UPDATE words 
+                                 SET name = @WordName 
+                                 WHERE id = @WordId
+                                 ";
+
+                DataTable table = new DataTable();
+                string sqlDataSource = _configuration.GetConnectionString("WordsAppCon");
+                NpgsqlDataReader myReader;
+                using (NpgsqlConnection myCon = new NpgsqlConnection(sqlDataSource))
                 {
-                    myCommand.Parameters.AddWithValue("@WordId", word.Id);
-                    myCommand.Parameters.AddWithValue("@WordName", word.Name);
-                    myReader = myCommand.ExecuteReader();
-                    table.Load(myReader);
-                    myReader.Close();
-                    myCon.Close();
+                    myCon.Open();
+                    using (NpgsqlCommand myCommand = new NpgsqlCommand(query, myCon))
+                    {
+                        myCommand.Parameters.AddWithValue("@WordId", word.Id);
+                        myCommand.Parameters.AddWithValue("@WordName", word.Name);
+                        myReader = myCommand.ExecuteReader();
+                        table.Load(myReader);
+                        myReader.Close();
+                        myCon.Close();
+                    }
                 }
+                return new JsonResult("Successfully edited word in the database!");
             }
-            return new JsonResult("Successfully edited word in the database!");
+            catch (Exception ex)
+            {
+                return new JsonResult(ex);
+            }
         }
 
         [HttpDelete("{id}")]
         public JsonResult Delete(int id)
         {
-            string query = @"DELETE FROM words WHERE id = @WordId";
-
-            DataTable table = new DataTable();
-            string sqlDataSource = _configuration.GetConnectionString("WordsAppCon");
-            NpgsqlDataReader myReader;
-            using (NpgsqlConnection myCon = new NpgsqlConnection(sqlDataSource))
+            try
             {
-                myCon.Open();
-                using (NpgsqlCommand myCommand = new NpgsqlCommand(query, myCon))
+                string query = @"DELETE FROM words WHERE id = @WordId";
+
+                DataTable table = new DataTable();
+                string sqlDataSource = _configuration.GetConnectionString("WordsAppCon");
+                NpgsqlDataReader myReader;
+                using (NpgsqlConnection myCon = new NpgsqlConnection(sqlDataSource))
                 {
-                    myCommand.Parameters.AddWithValue("@WordId", id);
-                    myReader = myCommand.ExecuteReader();
-                    table.Load(myReader);
-                    myReader.Close();
-                    myCon.Close();
+                    myCon.Open();
+                    using (NpgsqlCommand myCommand = new NpgsqlCommand(query, myCon))
+                    {
+                        myCommand.Parameters.AddWithValue("@WordId", id);
+                        myReader = myCommand.ExecuteReader();
+                        table.Load(myReader);
+                        myReader.Close();
+                        myCon.Close();
+                    }
                 }
+                return new JsonResult("Successfully deleted word in the database!");
             }
-            return new JsonResult("Successfully deleted word in the database!");
+            catch (Exception ex)
+            {
+                return new JsonResult(ex);
+            }
         }
     }
 }
